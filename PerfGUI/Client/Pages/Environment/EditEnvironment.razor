@@ -1,0 +1,73 @@
+@page "/environment/edit/{envId}"
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager navigation
+
+<h2>Edit</h2>
+<h4>Environment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        @if (projList == null || projList == null)
+        {
+            <strong>Loading...</strong>
+            
+        }
+        else if (projList != null && projList.Count() == 0)
+        {
+            <strong>No projects found. Please create a project first!</strong>
+        }
+        else
+        {
+            <EditForm Model="@env" OnValidSubmit="UpdateEnvironment">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-group">
+                    <label for="Name" class="control-label">Name</label>
+                    <InputText id="Name" class="form-control" @bind-Value="env.Name" />
+                </div>
+                <div>
+                    <label for="Project" class="control-label">Project</label>
+                    <InputSelectNumber id="Project" class="form-control" @bind-Value="env.ProjectId">
+                        @foreach (var proj in projList)
+                        {
+                            <option value="@proj.ProjectId">@proj.Name</option>
+                        }
+                    </InputSelectNumber>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default">Save</button>
+                    <button type="button" class="btn" @onclick="@cancel">Cancel</button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string envId { get; set; }
+
+    PerfGUI.Shared.Models.Environment env = new PerfGUI.Shared.Models.Environment();
+    private PerfGUI.Shared.Models.Project[] projList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        env = await Http.GetJsonAsync<PerfGUI.Shared.Models.Environment>(
+            "/api/Environment/Details/" + Convert.ToInt64(envId));
+        projList = await Http.GetJsonAsync<PerfGUI.Shared.Models.Project[]>("/api/Project/Index");
+    }
+
+    protected async Task UpdateEnvironment()
+    {
+        await Http.SendJsonAsync(HttpMethod.Put, "api/Environment/Edit", env);
+        navigation.NavigateTo("/environments");
+    }
+
+    void cancel()
+    {
+        navigation.NavigateTo("/environments");
+
+    }
+}

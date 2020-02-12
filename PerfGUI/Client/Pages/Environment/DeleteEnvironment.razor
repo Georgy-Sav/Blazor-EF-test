@@ -1,0 +1,58 @@
+@page "/environment/delete/{envId}"
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager navigation
+
+@if (env == null)// || proj == null)
+{
+    <strong>Loading...</strong>
+}
+else
+{
+    <h2>Delete</h2>
+    <h3>Are you sure you want to delete environment with id : @envId</h3>
+    <br />
+
+    <div class="col-md-4">
+        <table class="table">
+            <tr>
+                <td>Name</td>
+                <td>@env.Name</td>
+                <td>Project</td>
+                <td>@env.Project.Name</td>
+            </tr>
+        </table>
+        <div class="form-group">
+            <button type="button" class="btn btn-default" @onclick="@(async () => await Delete())">Delete</button>
+            <button type="button" class="btn" @onclick="@cancel">Cancel</button>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string envId { get; set; }
+    //private PerfGUI.Shared.Models.Project proj;
+
+    PerfGUI.Shared.Models.Environment env = new PerfGUI.Shared.Models.Environment();
+
+    protected override async Task OnInitializedAsync()
+    {
+        env = await Http.GetJsonAsync<PerfGUI.Shared.Models.Environment>(
+            "/api/Environment/Details/" + Convert.ToInt64(envId));
+        //proj = await Http.GetJsonAsync<PerfGUI.Shared.Models.Project>(
+        //    "/api/Project/Details/" + env.ProjectId);
+    }
+
+    protected async Task Delete()
+    {
+        await Http.DeleteAsync("api/Environment/Delete/" + Convert.ToInt64(envId));
+        navigation.NavigateTo("/environments");
+    }
+
+    void cancel()
+    {
+        navigation.NavigateTo("/environments");
+    }
+
+}

@@ -1,0 +1,37 @@
+@page "/project/add"
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager navigation
+
+<h1>Create</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form>
+            <div class="form-group">
+                <label for="Name" class="control-label">Name</label>
+                <input for="Name" class="form-control" @bind="@proj.Name" />
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-default" @onclick="@(async () => await CreateProject())">Save</button>
+                <button type="button" class="btn" @onclick="@cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@code {
+
+    PerfGUI.Shared.Models.Project proj = new PerfGUI.Shared.Models.Project();
+
+    protected async Task CreateProject()
+    {
+        await Http.SendJsonAsync(HttpMethod.Post, "/api/Project/Create", proj);
+        navigation.NavigateTo("/projects");
+    }
+
+    void cancel()
+    {
+        navigation.NavigateTo("/projects");
+    }
+}

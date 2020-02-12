@@ -1,0 +1,48 @@
+@page "/environments"
+@inject HttpClient Http
+
+<h1>Environment Data</h1>
+
+<p>
+    <a href="/environment/add">Create</a>
+</p>
+
+@if (envList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Project</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var env in envList)
+            {
+                <tr>
+                    <td>@env.EnvironmentId</td>
+                    <td>@env.Name</td>
+                    <td>@env.Project.Name</td>
+                    <td>
+                        <a href='/environment/edit/@env.EnvironmentId'>Edit</a>  |
+                        <a href='/environment/delete/@env.EnvironmentId'>Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    PerfGUI.Shared.Models.Environment[] envList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        envList = await Http.GetJsonAsync<PerfGUI.Shared.Models.Environment[]>("/api/Environment/Index");
+    }
+}

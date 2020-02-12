@@ -1,0 +1,46 @@
+@page "/projects"
+@inject HttpClient Http
+
+<h1>Projects Data</h1>
+
+<p>
+    <a href="/project/add">Create</a>
+</p>
+
+@if (projList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var proj in projList)
+            {
+                <tr>
+                    <td>@proj.ProjectId</td>
+                    <td>@proj.Name</td>
+                    <td>
+                        <a href='/project/edit/@proj.ProjectId'>Edit</a>  |
+                        <a href='/project/delete/@proj.ProjectId'>Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    PerfGUI.Shared.Models.Project[] projList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        projList = await Http.GetJsonAsync<PerfGUI.Shared.Models.Project[]>("/api/Project/Index");
+    }
+}

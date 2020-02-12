@@ -1,0 +1,47 @@
+@page "/project/delete/{projId}"
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager navigation
+
+
+<h2>Delete</h2>
+<h3>Are you sure you want to delete project with id : @projId</h3>
+<br />
+
+<div class="col-md-4">
+    <table class="table">
+        <tr>
+            <td>Name</td>
+            <td>@proj.Name</td>
+        </tr>
+    </table>
+    <div class="form-group">
+        <button type="button" class="btn btn-default" @onclick="@(async () => await Delete())">Delete</button>
+        <button type="button" class="btn" @onclick="@cancel">Cancel</button>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string projId { get; set; }
+
+    PerfGUI.Shared.Models.Project proj = new PerfGUI.Shared.Models.Project();
+
+    protected override async Task OnInitializedAsync()
+    {
+        proj = await Http.GetJsonAsync<PerfGUI.Shared.Models.Project>
+        ("/api/Project/Details/" + Convert.ToInt64(projId));
+    }
+
+    protected async Task Delete()
+    {
+        await Http.DeleteAsync("api/Project/Delete/" + Convert.ToInt64(projId));
+        navigation.NavigateTo("/projects");
+    }
+
+    void cancel()
+    {
+        navigation.NavigateTo("/projects");
+    }
+
+}

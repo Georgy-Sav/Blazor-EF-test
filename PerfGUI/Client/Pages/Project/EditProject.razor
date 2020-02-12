@@ -1,0 +1,48 @@
+@page "/project/edit/{projId}"
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager navigation
+
+<h2>Edit</h2>
+<h4>Project</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form>
+            <div class="form-group">
+                <label for="Name" class="control-label">Name</label>
+                <input for="Name" class="form-control" @bind="@proj.Name" />
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-default" @onclick="@(async () => await UpdateProject())">Save</button>
+                <button type="button" class="btn" @onclick="@cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string projId { get; set; }
+
+    PerfGUI.Shared.Models.Project proj = new PerfGUI.Shared.Models.Project();
+
+    protected override async Task OnInitializedAsync()
+    {
+        proj = await Http.GetJsonAsync<PerfGUI.Shared.Models.Project>
+            ("/api/Project/Details/" + Convert.ToInt64(projId));
+    }
+
+    protected async Task UpdateProject()
+    {
+        await Http.SendJsonAsync(HttpMethod.Put, "api/Project/Edit", proj);
+        navigation.NavigateTo("/projects");
+
+    }
+
+    void cancel()
+    {
+        navigation.NavigateTo("/projects");
+
+    }
+}

@@ -1,0 +1,66 @@
+@page "/environment/add"
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Components.NavigationManager navigation
+
+<h1>Create</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        @if (projList != null && projList.Count() != 0)
+        {
+            <EditForm Model="@env" OnValidSubmit="CreateEnvironment">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-group">
+                    <label for="Name" class="control-label">Name</label>
+                    <InputText id="Name" class="form-control" @bind-Value="env.Name" />
+                </div>
+                <div>
+                    <label for="Project" class="control-label">Project</label>
+                    <InputSelectNumber id="Project" class="form-control" @bind-Value="env.ProjectId">
+                        @foreach (var proj in projList)
+                        {
+                            <option value="@proj.ProjectId">@proj.Name</option>
+                        }
+                    </InputSelectNumber>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default">Save</button>
+                    <button type="button" class="btn" @onclick="@cancel">Cancel</button>
+                </div>
+            </EditForm>
+        }
+        else if (projList != null && projList.Count() == 0)
+        {
+            <strong>No projects found. Please create a project first!</strong>
+        }
+        else
+        {
+            <strong>Loading projects. Please wait...</strong>
+        }
+    </div>
+</div>
+
+@code {
+
+    private PerfGUI.Shared.Models.Environment env = new PerfGUI.Shared.Models.Environment();
+    private PerfGUI.Shared.Models.Project[] projList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        projList = await Http.GetJsonAsync<PerfGUI.Shared.Models.Project[]>("/api/Project/Index");
+    }
+    
+    protected async Task CreateEnvironment()
+    {
+        await Http.SendJsonAsync(HttpMethod.Post, "/api/Environment/Create", env);
+        navigation.NavigateTo("/environments");
+    }
+
+    void cancel()
+    {
+        navigation.NavigateTo("/environments");
+    }
+}
